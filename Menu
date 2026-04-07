@@ -1,0 +1,196 @@
+
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); }
+  .wrap { display: flex; gap: 0; height: 100vh; min-height: 520px; background: #f5f0e8; }
+  
+  .menu-panel { flex: 1.1; background: #f5f0e8; padding: 16px; display: flex; flex-direction: column; }
+  .logo-box { background: #4a2c0e; color: #f5f0e8; border-radius: 10px; padding: 8px 14px; text-align: center; width: fit-content; margin: 0 auto 10px; }
+  .logo-box .b { font-size: 18px; font-weight: 700; letter-spacing: 1px; }
+  .logo-box .cafe { font-size: 9px; letter-spacing: 3px; }
+  .menu-title { text-align: center; font-size: 20px; font-weight: 700; letter-spacing: 4px; color: #4a2c0e; margin-bottom: 10px; }
+  
+  .menu-item { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.45); border-radius: 12px; padding: 8px 10px; margin-bottom: 6px; cursor: pointer; border: 1.5px solid transparent; transition: all 0.15s; position: relative; }
+  .menu-item:hover { background: rgba(255,255,255,0.75); border-color: #c8a96e; transform: translateX(3px); }
+  .menu-item.added { border-color: #4a2c0e; background: rgba(74,44,14,0.07); }
+  .item-icon { font-size: 28px; width: 36px; text-align: center; flex-shrink: 0; }
+  .item-info { flex: 1; }
+  .item-name { font-size: 13px; font-weight: 600; color: #3a2008; }
+  .item-desc { font-size: 10px; color: #8b6040; margin-top: 1px; }
+  .item-price { font-size: 13px; font-weight: 700; color: #4a2c0e; flex-shrink: 0; }
+  .item-badge { position: absolute; right: 8px; top: 6px; background: #4a2c0e; color: #f5f0e8; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+  .add-hint { font-size: 9px; color: #9b7a55; text-align: center; margin-top: 4px; letter-spacing: 0.5px; }
+  
+  .divider { width: 1px; background: #d4c4a8; margin: 16px 0; }
+  
+  .bill-panel { flex: 0.9; background: #fff8f0; display: flex; flex-direction: column; padding: 12px; }
+  .machine-top { background: #3a3a3a; border-radius: 10px 10px 0 0; padding: 8px 16px 0; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .machine-light { width: 8px; height: 8px; border-radius: 50%; background: #2ecc71; box-shadow: 0 0 6px #2ecc71; }
+  .machine-label { font-size: 9px; color: #aaa; letter-spacing: 2px; font-weight: 600; }
+  .machine-slot { background: #2a2a2a; height: 6px; margin: 0 20px; border-radius: 0 0 4px 4px; }
+  
+  .receipt-area { flex: 1; background: #fffef9; border: 1px solid #e0d5c0; border-top: none; padding: 12px 14px; overflow: hidden; display: flex; flex-direction: column; }
+  .receipt-header { text-align: center; border-bottom: 1px dashed #c8b890; padding-bottom: 8px; margin-bottom: 8px; }
+  .receipt-brand { font-size: 14px; font-weight: 700; letter-spacing: 2px; color: #3a2008; }
+  .receipt-sub { font-size: 9px; color: #9b7a55; margin-top: 1px; }
+  .receipt-date { font-size: 9px; color: #9b7a55; margin-top: 4px; }
+  
+  .receipt-items { flex: 1; }
+  .receipt-row { display: flex; justify-content: space-between; font-size: 11px; color: #4a2c0e; padding: 2px 0; }
+  .receipt-row .qty { color: #9b7a55; margin-right: 4px; }
+  .receipt-empty { font-size: 11px; color: #bbb; text-align: center; margin-top: 20px; font-style: italic; }
+  
+  .receipt-footer { border-top: 1px dashed #c8b890; padding-top: 8px; margin-top: 6px; }
+  .receipt-subtotal { display: flex; justify-content: space-between; font-size: 11px; color: #9b7a55; padding: 1px 0; }
+  .receipt-total { display: flex; justify-content: space-between; font-size: 14px; font-weight: 700; color: #3a2008; margin-top: 4px; }
+  .receipt-thank { text-align: center; font-size: 9px; color: #9b7a55; margin-top: 8px; letter-spacing: 0.5px; }
+  
+  .print-strip { background: #2a2a2a; height: 12px; border-radius: 0 0 6px 6px; margin: 0 8px; position: relative; overflow: hidden; }
+  .print-anim { position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent); }
+  
+  .clear-btn { background: #4a2c0e; color: #f5f0e8; border: none; border-radius: 8px; padding: 7px; font-size: 11px; font-weight: 600; cursor: pointer; margin-top: 8px; letter-spacing: 0.5px; width: 100%; }
+  .clear-btn:hover { background: #3a2008; }
+  
+  .print-line { background: #f0e8d0; height: 2px; margin: 2px 0; border-radius: 1px; transform: scaleX(0); transform-origin: left; animation: none; }
+  @keyframes printLine { 0% { transform: scaleX(0); } 100% { transform: scaleX(1); } }
+  .printing .print-line { animation: printLine 0.3s ease forwards; }
+  .printing .print-anim { animation: shimmer 0.6s linear infinite; }
+  @keyframes shimmer { 0% { left: -100%; } 100% { left: 100%; } }
+</style>
+
+<h2 class="sr-only">Boojee Café interactive menu — click items to add to cart and generate a bill receipt</h2>
+
+<div class="wrap">
+  <div class="menu-panel">
+    <div class="logo-box"><div class="b">B☀JEE</div><div class="cafe">CAFE</div></div>
+    <div class="menu-title">MENU</div>
+    <div id="menu-list"></div>
+    <div class="add-hint">↑ tap any item to add to order</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="bill-panel">
+    <div class="machine-top">
+      <div class="machine-light" id="mlight"></div>
+      <div class="machine-label">POS TERMINAL</div>
+    </div>
+    <div class="machine-slot"></div>
+    
+    <div class="receipt-area">
+      <div class="receipt-header">
+        <div class="receipt-brand">BOOJEE CAFÉ</div>
+        <div class="receipt-sub">DUBAI, DIFC</div>
+        <div class="receipt-date" id="rdate"></div>
+      </div>
+      <div class="receipt-items" id="receipt-items">
+        <div class="receipt-empty" id="empty-msg">No items yet.<br>Select from the menu →</div>
+      </div>
+      <div class="receipt-footer" id="receipt-footer" style="display:none;">
+        <div class="receipt-subtotal"><span>Subtotal</span><span id="r-sub"></span></div>
+        <div class="receipt-subtotal"><span>VAT (5%)</span><span id="r-tax"></span></div>
+        <div class="receipt-total"><span>TOTAL</span><span id="r-total"></span></div>
+        <div class="receipt-thank">✦ Thank you — Come back soon ✦<br>Bandra to Burj · Est. 2025</div>
+      </div>
+    </div>
+    
+    <div class="print-strip" id="pstrip">
+      <div class="print-anim" id="panim"></div>
+    </div>
+    <button class="clear-btn" onclick="clearCart()">Clear Order</button>
+  </div>
+</div>
+
+<script>
+const menuData = [
+  { id: 1, icon: "☕", name: "Classic Latte", desc: "Smooth espresso & steamed milk", price: 25 },
+  { id: 2, icon: "🥤", name: "Nitro Cold Brew", desc: "Nitrogen-infused, velvety cold brew", price: 25 },
+  { id: 3, icon: "🫖", name: "Semmultic Dark Brew", desc: "Deep roast, bold intensity", price: 26 },
+  { id: 4, icon: "🌸", name: "Date & Cardamom Latte", desc: "Emirati-inspired signature blend", price: 16 },
+  { id: 5, icon: "🥐", name: "Croissant Butter Scone", desc: "Flaky, golden, freshly baked", price: 28 },
+  { id: 6, icon: "🍰", name: "Mango Cheesecake", desc: "Creamy layers, tropical finish", price: 28 },
+];
+
+let cart = {};
+
+function renderMenu() {
+  const list = document.getElementById("menu-list");
+  list.innerHTML = menuData.map(item => `
+    <div class="menu-item ${cart[item.id] ? 'added' : ''}" onclick="addItem(${item.id})" id="mi-${item.id}">
+      <div class="item-icon">${item.icon}</div>
+      <div class="item-info">
+        <div class="item-name">${item.name}</div>
+        <div class="item-desc">${item.desc}</div>
+      </div>
+      <div class="item-price">AED ${item.price}</div>
+      ${cart[item.id] ? `<div class="item-badge">${cart[item.id]}</div>` : ''}
+    </div>
+  `).join('');
+}
+
+function addItem(id) {
+  cart[id] = (cart[id] || 0) + 1;
+  renderMenu();
+  renderReceipt();
+  triggerPrint();
+}
+
+function clearCart() {
+  cart = {};
+  renderMenu();
+  renderReceipt();
+}
+
+function triggerPrint() {
+  const strip = document.getElementById("pstrip");
+  strip.classList.remove("printing");
+  void strip.offsetWidth;
+  strip.classList.add("printing");
+  setTimeout(() => strip.classList.remove("printing"), 700);
+  
+  const light = document.getElementById("mlight");
+  light.style.background = "#f39c12";
+  light.style.boxShadow = "0 0 6px #f39c12";
+  setTimeout(() => { light.style.background = "#2ecc71"; light.style.boxShadow = "0 0 6px #2ecc71"; }, 600);
+}
+
+function renderReceipt() {
+  const items = menuData.filter(i => cart[i.id]);
+  const container = document.getElementById("receipt-items");
+  const empty = document.getElementById("empty-msg");
+  const footer = document.getElementById("receipt-footer");
+  
+  if (!items.length) {
+    container.innerHTML = '<div class="receipt-empty" id="empty-msg">No items yet.<br>Select from the menu →</div>';
+    footer.style.display = "none";
+    return;
+  }
+  
+  let sub = 0;
+  let html = "";
+  items.forEach(i => {
+    const line = i.price * cart[i.id];
+    sub += line;
+    html += `<div class="receipt-row"><span><span class="qty">${cart[i.id]}×</span>${i.name}</span><span>AED ${line}</span></div>`;
+  });
+  container.innerHTML = html;
+  
+  const tax = sub * 0.05;
+  const total = sub + tax;
+  
+  document.getElementById("r-sub").textContent = `AED ${sub.toFixed(2)}`;
+  document.getElementById("r-tax").textContent = `AED ${tax.toFixed(2)}`;
+  document.getElementById("r-total").textContent = `AED ${total.toFixed(2)}`;
+  footer.style.display = "block";
+}
+
+function setDate() {
+  const d = new Date();
+  document.getElementById("rdate").textContent = d.toLocaleString('en-AE', { dateStyle: 'medium', timeStyle: 'short' });
+}
+
+setDate();
+renderMenu();
+renderReceipt();
+</script>
